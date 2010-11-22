@@ -13,8 +13,8 @@ require 'sinatra'
 require 'yaml'
 
 # Load $config.
-$config = YAML.load_file relative("config.yml")
-$users = YAML.load_file relative("authorized_users.yml")
+$config = YAML.load_file(relative("config.yml"))
+$users = YAML.load_file(relative("authorized_users.yml"))
 
 SwitchChannel = $config["SwitchChannel"]
 SwitchDelay = $config["SwitchDelay"]
@@ -62,12 +62,13 @@ def shellfm_trigger(name)
   Thread.new {
     time = hk_time
     #if time.hour >= 8 and time.hour <= 21
-      if radio_prefs = YAML.load_file relative("user_radio_prefs.yml")
+      if radio_prefs = YAML.load_file(relative("user_radio_prefs.yml"))
         if stations = radio_prefs[name]
           # Pick a random station, and play it.
           station = stations[rand(stations.size)]
+          base_url = URI.parse("http://music-10c/")
           res = Net::HTTP.start(base_url.host, base_url.port) {|http|
-            http.get("http://music-10c/play_station_if_idle?station=#{station}")
+            http.get("/play_station_if_idle?station=#{station}")
           }
         end
       end
