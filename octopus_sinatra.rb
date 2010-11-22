@@ -42,7 +42,8 @@ end
 def unlock_door
   $k8055.set_digital SwitchChannel, false
   # Clears the channel after delay.
-  Thread.new { sleep SwitchDelay; $k8055.set_digital SwitchChannel, false }
+  sleep SwitchDelay
+  $k8055.set_digital SwitchChannel, false
 end
 
 def user_select_options
@@ -68,9 +69,13 @@ def shellfm_trigger(name)
         # Pick a random station, and play it.
         station = stations[rand(stations.size)]
         base_url = URI.parse("http://music-10c/")
-        res = Net::HTTP.start(base_url.host, base_url.port) {|http|
-          http.get("/play_station_if_idle?station=#{station}")
-        }
+        begin
+          res = Net::HTTP.start(base_url.host, base_url.port) {|http|
+            http.get("/play_station_if_idle?station=#{station}")
+          }
+        rescue
+          # We don't mind if the request times out.
+        end
       end
     end
   end
@@ -126,10 +131,8 @@ get '/octopus/:id' do
     unlock_door
     message = "  [#{params[:id]}]  " +
               "Welcome, #{name.split.first}!"
-    lcd_message message, 1, 40, false
+    lcd_message message, 1, 40, true
     shellfm_trigger(name)
-    sleep MsgDelay
-    lcd_default
   else
     message = "  [#{params[:id]}]  " +
               "  Access Denied."
