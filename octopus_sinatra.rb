@@ -11,6 +11,8 @@ include USB
 
 require 'sinatra'
 require 'yaml'
+require 'net/http'
+require 'uri'
 
 # Load $config.
 $config = YAML.load_file(relative("config.yml"))
@@ -100,7 +102,7 @@ get '/' do
   </head>
   <body>
     <h3>Flat 10C - Access Control</h3>
-    <p>The time is <%= hk_time_fmt %> - <a href="/gettime">(Update)</a></p>
+    <p>The time is #{hk_time_fmt} - <a href="/gettime">(Update)</a></p>
     <p>Please select your name, and enter your password to unlock Flat 10C</p>
 
     <form name="input" action="unlock" method="post">
