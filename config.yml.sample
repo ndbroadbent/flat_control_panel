@@ -1,0 +1,10 @@
+---
+SwitchChannel: 1
+SwitchDelay: 0.5
+MsgDelay: 2.5
+
+octopus_devnode: "/dev/octopus"
+lcd_devnode: "/dev/lcddisplay"
+
+sinatra_base_url: "http://localhost:80"
+
