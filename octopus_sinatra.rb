@@ -61,21 +61,19 @@ end
 def shellfm_trigger(name)
   # Send a trigger to shell-fm server if user has any configured radio preferences.
   # (and if the time is reasonable.)
-  Thread.new {
-    time = hk_time
-    #if time.hour >= 8 and time.hour <= 21
-      if radio_prefs = YAML.load_file(relative("user_radio_prefs.yml"))
-        if stations = radio_prefs[name]
-          # Pick a random station, and play it.
-          station = stations[rand(stations.size)]
-          base_url = URI.parse("http://music-10c/")
-          res = Net::HTTP.start(base_url.host, base_url.port) {|http|
-            http.get("/play_station_if_idle?station=#{station}")
-          }
-        end
+  time = hk_time
+  if time.hour >= 7 and time.hour <= 22
+    if radio_prefs = YAML.load_file(relative("user_radio_prefs.yml"))
+      if stations = radio_prefs[name]
+        # Pick a random station, and play it.
+        station = stations[rand(stations.size)]
+        base_url = URI.parse("http://music-10c/")
+        res = Net::HTTP.start(base_url.host, base_url.port) {|http|
+          http.get("/play_station_if_idle?station=#{station}")
+        }
       end
-    #end
-  }
+    end
+  end
 end
 
 # Loop until devices are connected
@@ -126,10 +124,12 @@ get '/octopus/:id' do
   if user = $users.detect {|u| u[1]["octopus_id"] == params[:id] }
     name = user[0]
     unlock_door
-    shellfm_trigger(name)
     message = "  [#{params[:id]}]  " +
               "Welcome, #{name.split.first}!"
-    lcd_message message, 1, 40, true
+    lcd_message message, 1, 40, false
+    shellfm_trigger(name)
+    sleep MsgDelay
+    lcd_default
   else
     message = "  [#{params[:id]}]  " +
               "  Access Denied."
