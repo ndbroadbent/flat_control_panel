@@ -71,13 +71,16 @@ def shellfm_trigger(name)
         # Pick a random station, and play it.
         station = stations[rand(stations.size)]
         base_url = URI.parse("http://music-10c/")
-        begin
-          res = Net::HTTP.start(base_url.host, base_url.port) {|http|
-            http.read_timeout = 60
-            http.get("/play_station_if_idle?station=#{station}")
-          }
-        rescue
-          # Request timed out after 60 seconds.
+        successful = false
+        while !successful
+          begin
+            res = Net::HTTP.start(base_url.host, base_url.port) {|http|
+              http.get("/play_station_if_idle?station=#{station}")
+            }
+            successful = true
+          rescue
+            # Request timed out, try again.
+          end
         end
       end
     end
