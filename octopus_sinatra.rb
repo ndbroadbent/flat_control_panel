@@ -114,6 +114,7 @@ get '/octopus/:id' do
     lcd_message message, 1, 40, true
     shellfm_trigger(name)
   else
+    $lastOctopusID = params[:id]
     message = "  [#{params[:id]}]  " +
               "  Access Denied."
     lcd_message message, 1, 40, true
