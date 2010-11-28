@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <title>Flat 10C - Access Control</title>
+  </head>
+  <body>
+    <h3>Flat 10C - Access Control</h3>
+    <hr/>
+    <p><small>Last Octopus ID : <%= $lastOctopusID %>
+    <a href="/edit_users" style="color: transparent;">Edit authorized users</a></small></p>
+
+    <p>The time is <%= hk_time_fmt %> - <a href="/gettime">(Update)</a></p>
+    <p>Please select your name, and enter your password to unlock Flat 10C</p>
+
+    <form name="input" action="unlock" method="post">
+      User: <select name="user">
+        <option></option>
+        <%= user_select_options %>
+      </select></br>
+      Password: <input type="password" name="password" />
+      <input type="submit" value="Unlock" />
+    </form>
+
+  </body>
+</html>
+

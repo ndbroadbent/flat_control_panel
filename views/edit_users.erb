@@ -1,0 +1,20 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title>Editing <%= @filename %></title>
+  </head>
+  <body>
+    <form action="/edit_users" method="post">
+    <h1>Editing <%= @filename %></h1>
+      <textarea name="data" rows=10 cols=160 /><%= @data %></textarea><br />
+      <p>Login:</p>
+      User: <select name="user">
+        <option></option>
+        <%= user_select_options %>
+      </select></br>
+      Password: <input type="password" name="password" /><br/>
+      <input type="submit" value="Save File" />
+    </form>
+  </body>
+</html>
+

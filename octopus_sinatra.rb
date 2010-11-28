@@ -26,6 +26,8 @@ $k8055 = RubyK8055.new
 $k8055.connect
 $k8055.clear_all_digital
 
+$lastOctopusID = ""
+
 def lcd_message(str, s_pos=21, e_pos=40, timeout=true)
   $dsp420.write str, s_pos, e_pos
   if timeout
@@ -71,10 +73,11 @@ def shellfm_trigger(name)
         base_url = URI.parse("http://music-10c/")
         begin
           res = Net::HTTP.start(base_url.host, base_url.port) {|http|
+            http.read_timeout = 60
             http.get("/play_station_if_idle?station=#{station}")
           }
         rescue
-          # We don't mind if the request times out.
+          # Request timed out after 60 seconds.
         end
       end
     end
@@ -98,30 +101,7 @@ lcd_default
 
 
 get '/' do
-  page = <<EOF
-<html>
-  <head>
-    <title>Flat 10C - Access Control</title>
-  </head>
-  <body>
-    <h3>Flat 10C - Access Control</h3>
-    <p>The time is #{hk_time_fmt} - <a href="/gettime">(Update)</a></p>
-    <p>Please select your name, and enter your password to unlock Flat 10C</p>
-
-    <form name="input" action="unlock" method="post">
-      <select name="user">
-        <option></option>
-        #{user_select_options}
-      </select>
-      Password: <input type="password" name="password" />
-      <input type="submit" value="Unlock" />
-    </form>
-
-  </body>
-</html>
-
-EOF
-  return page
+  erb :index
 end
 
 get '/octopus/:id' do
@@ -165,5 +145,27 @@ end
 get '/gettime' do
   `sudo /usr/bin/getTime.sh &`
   return ""
+end
+
+
+# Shows a simple form to edit the alarms.yml file for the shellfm_lcd_console
+get '/edit_users' do
+  @filename = File.join(File.dirname(__FILE__), "authorized_users.yml")
+  @data = File.open(@filename, "r").read
+
+  erb :edit_users
+end
+post '/edit_users' do
+  @filename = File.join(File.dirname(__FILE__), "authorized_users.yml")
+  user = $users[params[:user]]
+  if user && user['http_pwd'] && user['http_pwd'] == params[:password]
+    File.open(@filename, "w") do |f|
+      f.puts params['data']
+    end
+    $users = YAML.load(params['data'])
+    redirect '/'
+  else
+    return "<html><body><h2>YOU SHALL NOT PASS</h2></body></html>"
+  end
 end
 
