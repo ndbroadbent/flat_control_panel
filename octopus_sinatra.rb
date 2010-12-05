@@ -52,7 +52,7 @@ def unlock_door_action
     # Clears the channel after delay.
     sleep SwitchDelay
     $k8055.set_digital SwitchChannel, false
-    sleep(SwitchDelay * 2)
+    sleep 1.5
     $k8055.set_digital GreenChannel, false
   end
 end
@@ -61,9 +61,9 @@ def access_denied_action
   Thread.new do
     $k8055.set_digital RedChannel, false
     $k8055.set_digital BuzzerChannel, false
-    # Flash buzzer on and off 4 times
-    7.times do
-      sleep SwitchDelay
+    # Flash buzzer on and off 5 times
+    9.times do
+      sleep 0.2
       $k8055.set_digital BuzzerChannel, false
     end
     $k8055.set_digital RedChannel, false
