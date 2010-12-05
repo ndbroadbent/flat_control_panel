@@ -19,6 +19,10 @@ $config = YAML.load_file(relative("config.yml"))
 $users = YAML.load_file(relative("authorized_users.yml"))
 
 SwitchChannel = $config["SwitchChannel"]
+GreenChannel = $config["GreenChannel"]
+RedChannel = $config["RedChannel"]
+BuzzerChannel = $config["BuzzerChannel"]
+
 SwitchDelay = $config["SwitchDelay"]
 MsgDelay = $config["MsgDelay"]
 
@@ -41,11 +45,29 @@ def lcd_default   # Default lcd display
   lcd_message " Octopus / Internet ", 21, 40, false
 end
 
-def unlock_door
-  $k8055.set_digital SwitchChannel, false
-  # Clears the channel after delay.
-  sleep SwitchDelay
-  $k8055.set_digital SwitchChannel, false
+def unlock_door_action
+  Thread.new do
+    $k8055.set_digital SwitchChannel, false
+    $k8055.set_digital GreenChannel, false
+    # Clears the channel after delay.
+    sleep SwitchDelay
+    $k8055.set_digital SwitchChannel, false
+    sleep(SwitchDelay * 2)
+    $k8055.set_digital GreenChannel, false
+  end
+end
+
+def access_denied_action
+  Thread.new do
+    $k8055.set_digital RedChannel, false
+    $k8055.set_digital BuzzerChannel, false
+    # Flash buzzer on and off 4 times
+    7.times do
+      sleep SwitchDelay
+      $k8055.set_digital BuzzerChannel, false
+    end
+    $k8055.set_digital RedChannel, false
+  end
 end
 
 def user_select_options
@@ -111,12 +133,13 @@ get '/octopus/:id' do
   # If user can authenticate
   if user = $users.detect {|u| u[1]["octopus_id"] == params[:id] }
     name = user[0]
-    unlock_door
+    unlock_door_action
     message = "  [#{params[:id]}]  " +
               "Welcome, #{name.split.first}!"
     lcd_message message, 1, 40, true
     shellfm_trigger(name)
   else
+    access_denied_action
     $lastOctopusID = params[:id]
     message = "  [#{params[:id]}]  " +
               "  Access Denied."
@@ -129,13 +152,14 @@ post '/unlock' do
   # If user can authenticate
   user = $users[params[:user]]
   if user && user['http_pwd'] && user['http_pwd'] == params[:password]
-    unlock_door
+    unlock_door_action
     name = params[:user]
 
     lcd_message "  HTTP - #{ @env['REMOTE_ADDR'] } ", 1, 20, false
     message = "Welcome, #{name.split.first}!"
     lcd_message message, 21, 40, true
   else
+    access_denied_action
     lcd_message "  HTTP - #{ @env['REMOTE_ADDR'] } ", 1, 20, false
     message = "  Access Denied."
     lcd_message message, 21, 40, true

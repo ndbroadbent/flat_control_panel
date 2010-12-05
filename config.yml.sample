@@ -1,5 +1,8 @@
 ---
 SwitchChannel: 1
+GreenChannel: 2
+RedChannel: 3
+BuzzerChannel: 4
 SwitchDelay: 0.5
 MsgDelay: 2.5
 
