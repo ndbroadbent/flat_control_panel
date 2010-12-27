@@ -171,56 +171,50 @@ get '/octopus/:id' do
   return ""
 end
 
-post '/unlock' do
+post '/action' do
   # If user can authenticate
   user = $users[params[:user]]
   if user && user['http_pwd'] && user['http_pwd'] == params[:password]
-    name = params[:user]
-    unlock_door_action
-    lcd_message "  HTTP - #{ @env['REMOTE_ADDR'] } ", 1, 20, false
-    message = "Welcome, #{name.split.first}!"
-    lcd_message message, 21, 40, true
+    # Process requested action.
 
-    # Post unlock actions
-    # ------------------------------------------
-    shellfm_trigger(name)
-    hall_light_trigger
+    # Kill hall light timed thread, if running
+    if params[:action].include?("Hall Light")
+      $hall_light_thread.kill if $hall_light_thread
+      $hall_light_thread = nil
+    end
+
+    case params[:action]
+    when "Unlock Door"
+      name = params[:user]
+      unlock_door_action
+      message = "Welcome, #{name.split.first}!"
+
+      # Post unlock actions
+      # ------------------------------------------
+      shellfm_trigger(name)
+      hall_light_trigger
+    when "Turn on Hall Light"
+      unless $hall_light_on
+        $k8055.set_digital HallLightChannel, false
+        $hall_light_on = true
+        message = "Hall light is on."
+      end
+    when "Turn off Hall Light"
+      if $hall_light_on
+        $k8055.set_digital HallLightChannel, false
+        $hall_light_on = false
+        message = "Hall light is off."
+      end
+    end
+
+    # Display LCD message for action
+    lcd_message "  HTTP - #{ @env['REMOTE_ADDR'] } ", 1, 20, false
+    lcd_message message, 21, 40, true
   else
     access_denied_action
     lcd_message "  HTTP - #{ @env['REMOTE_ADDR'] } ", 1, 20, false
     message = "  Access Denied."
     lcd_message message, 21, 40, true
-  end
-
-  return "<html><body><p>HTTP - #{ @env['REMOTE_ADDR'] }</p><h2>#{message}</h2></body></html>"
-
-end
-
-post '/hall_light' do
-  # If user can authenticate
-  user = $users[params[:user]]
-
-  message = "Nothing Changed."
-  if user && user['http_pwd'] && user['http_pwd'] == params[:password]
-    # Kill hall light timed thread, if running
-    $hall_light_thread.kill if $hall_light_thread
-    $hall_light_thread = nil
-
-    if params[:hall_light] = "ON"
-      unless $hall_light_on
-        $k8055.set_digital HallLightChannel, false
-        $hall_light_on = true
-        message = "Hall light is now on."
-      end
-    else
-      if $hall_light_on
-        $k8055.set_digital HallLightChannel, false
-        $hall_light_on = false
-        message = "Hall light is now off."
-      end
-    end
-  else
-    message = "Access Denied."
   end
 
   return "<html><body><p>HTTP - #{ @env['REMOTE_ADDR'] }</p><h2>#{message}</h2></body></html>"

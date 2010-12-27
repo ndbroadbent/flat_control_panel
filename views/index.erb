@@ -11,13 +11,16 @@
     <p>The time is <%= hk_time_fmt %> - <a href="/gettime">(Update)</a></p>
     <p>Please select your name, and enter your password to unlock Flat 10C</p>
 
-    <form name="input" action="unlock" method="post">
+    <form name="input" action="/action" method="post">
       User: <select name="user">
         <option></option>
         <%= user_select_options %>
       </select></br>
       Password: <input type="password" name="password" />
-      <input type="submit" value="Unlock" />
+      <br/>
+      <input type="submit" name="action" value="Unlock Door" /><br/>
+      <input type="submit" name="action" value="Turn on Hall Light" /><br/>
+      <input type="submit" name="action" value="Turn off Hall Light" /><br/>
     </form>
 
   </body>
