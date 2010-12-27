@@ -155,20 +155,20 @@ get '/octopus/:id' do
   if user = $users.detect {|u| u[1]["octopus_id"] == params[:id] }
     name = user[0]
     unlock_door_action
-    message = "  [#{params[:id]}]  " +
-              "Welcome, #{name.split.first}!"
-    lcd_message message, 1, 40, true
+    @message = "  [#{params[:id]}]  " +
+               "Welcome, #{name.split.first}!"
+    lcd_message @message, 1, 40, true
 
     # Post unlock actions
     # ------------------------------------------
-    hall_light_trigger
+    hall_light_trigger unless $hall_light_on
     shellfm_trigger(name)
   else
     access_denied_action
     $lastOctopusID = params[:id]
-    message = "  [#{params[:id]}]  " +
-              "  Access Denied."
-    lcd_message message, 1, 40, true
+    @message = "  [#{params[:id]}]  " +
+               "  Access Denied."
+    lcd_message @message, 1, 40, true
   end
   return ""
 end
@@ -189,23 +189,23 @@ post '/action' do
     when "Unlock Door"
       name = params[:user]
       unlock_door_action
-      message = "Welcome, #{name.split.first}!"
+      @message = "Welcome, #{name.split.first}!"
 
       # Post unlock actions
       # ------------------------------------------
-      hall_light_trigger
+      hall_light_trigger unless $hall_light_on
       shellfm_trigger(name)
     when "Turn Hall Light [ON]"
       unless $hall_light_on
         $k8055.set_digital HallLightChannel, false
         $hall_light_on = true
-        message = "Hall light is on."
+        @message = "Hall light is on."
       end
     when "Turn Hall Light [OFF]"
       if $hall_light_on
         $k8055.set_digital HallLightChannel, false
         $hall_light_on = false
-        message = "Hall light is off."
+        @message = "Hall light is off."
       end
     when "Edit Authorizations"
       # Edit authorized users list
@@ -216,15 +216,15 @@ post '/action' do
 
     # Display LCD message for action
     lcd_message "  HTTP - #{ @env['REMOTE_ADDR'] } ", 1, 20, false
-    lcd_message message, 21, 40, true
+    lcd_message @message, 21, 40, true
   else
     access_denied_action
     lcd_message "  HTTP - #{ @env['REMOTE_ADDR'] } ", 1, 20, false
-    message = "  Access Denied."
-    lcd_message message, 21, 40, true
+    @message =  "  Access Denied."
+    lcd_message @message, 21, 40, true
   end
 
-  return "<html><body><p>HTTP - #{ @env['REMOTE_ADDR'] }</p><h2>#{message}</h2></body></html>"
+  return "<html><body><p>HTTP - #{ @env['REMOTE_ADDR'] }</p><h2>#{@message}</h2></body></html>"
 
 end
 
