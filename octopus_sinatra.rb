@@ -185,6 +185,7 @@ post '/action' do
       $hall_light_thread = nil
     end
 
+    @message = ""
     case params[:action]
     when "Unlock Door"
       name = params[:user]
@@ -207,6 +208,9 @@ post '/action' do
         $hall_light_on = false
         @message = "Hall light is off."
       end
+    when "Keep Hall Light [ON]"
+      # Hall light thread is already killed above.
+      @message = "Light will stay on."
     when "Edit Authorizations"
       # Edit authorized users list
       @filename = File.join(File.dirname(__FILE__), "authorized_users.yml")
@@ -224,8 +228,7 @@ post '/action' do
     lcd_message @message, 21, 40, true
   end
 
-  return "<html><body><p>HTTP - #{ @env['REMOTE_ADDR'] }</p><h2>#{@message}</h2></body></html>"
-
+  erb :index
 end
 
 # To manually update time.

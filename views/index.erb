@@ -6,9 +6,9 @@
   <body>
     <div id="control_panel" class="box_frame">
 
-      <h3>Flat 10C - Access Control</h3>
+      <h2>Flat 10C</h2>
 
-      <p><%= @message %></p>
+      <p class="notice"><%= @message %></p>
 
       <hr/>
 
@@ -43,6 +43,9 @@
             <input type="submit" name="action" class="action" value="Turn Hall Light [ON]" />
           <% end %>
           </li>
+          <% if $hall_light_thread %>
+            <input type="submit" name="action" class="action" value="Keep Hall Light [ON]" />
+          <% end %>
         </ul>
 
         <hr/>

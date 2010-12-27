@@ -2,20 +2,31 @@ body {
   background-color: #000;
   color: #FFF;
   text-align: center;
+  font-family: Verdana, Helvetica, "Lucida Grande", Arial, sans-serif;
 }
 
-a { color: #0F0; }
+a {
+  color: #0F0;
+}
 
-h3 { text-shadow: 1px 2px #282; }
+h2 {
+  text-shadow: 1px 2px #282;
+}
 
 .box_frame {
   margin: auto;
-  width: 280px;
+  width: 300px;
   border: 1px solid #4F4;
   padding: 14px;
+  padding-top: 3px;
 }
 .box_frame p {
   margin: 10px auto;
+}
+.box_frame p.notice {
+  padding: 5px;
+  background-color: #222;
+  border: 1px solid #444;
 }
 .box_frame ul {
   margin: 0;
@@ -34,7 +45,7 @@ h3 { text-shadow: 1px 2px #282; }
   display: inline;
 }
 .box_frame input.action {
-  font-size: 20px;
+  font-size: 18px;
   width: 90%;
 }
 
