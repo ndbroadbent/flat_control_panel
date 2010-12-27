@@ -1,28 +1,57 @@
 <html>
   <head>
     <title>Flat 10C - Access Control</title>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/styles.css" >
   </head>
   <body>
-    <h3>Flat 10C - Access Control</h3>
-    <hr/>
-    <p><small>Last unauthorized Octopus ID : <%= $lastOctopusID %>
-    <a href="/edit_users" style="color: transparent;">Edit authorized users</a></small></p>
+    <div id="control_panel" class="box_frame">
 
-    <p>The time is <%= hk_time_fmt %> - <a href="/gettime">(Update)</a></p>
-    <p>Please select your name, and enter your password to unlock Flat 10C</p>
+      <h3>Flat 10C - Access Control</h3>
 
-    <form name="input" action="/action" method="post">
-      User: <select name="user">
-        <option></option>
-        <%= user_select_options %>
-      </select></br>
-      Password: <input type="password" name="password" />
-      <br/>
-      <input type="submit" name="action" value="Unlock Door" /><br/>
-      <input type="submit" name="action" value="Turn on Hall Light" /><br/>
-      <input type="submit" name="action" value="Turn off Hall Light" /><br/>
-    </form>
+      <hr/>
 
+      <form name="input" action="/action" method="post">
+
+        <p><small>Please select your name and <br/>enter your password:</small></p>
+
+        <ul class="login_fields">
+          <li>User:</li>
+          <li>
+            <select name="user">
+              <option></option>
+              <%= user_select_options %>
+            </select>
+          </li>
+        </ul>
+        <ul class="login_fields">
+          <li>Password:</li>
+          <li>
+            <input type="password" name="password" />
+          </li>
+        </ul>
+
+        <hr/>
+
+        <ul class="button_list">
+          <li><input type="submit" name="action" class="action" value="Unlock Door" /></li>
+          <li>
+          <% if $hall_light_on %>
+            <input type="submit" name="action" class="action" value="Turn Hall Light [OFF]" />
+          <% else %>
+            <input type="submit" name="action" class="action" value="Turn Hall Light [ON]" />
+          <% end %>
+          </li>
+        </ul>
+
+        <hr/>
+
+        <p><small>Last unauthorized Octopus ID : </small></p>
+        <p><small><%= $lastOctopusID.empty? ? "(none)" : $lastOctopusID %></small></p>
+        <p><input type="submit" name="action" value="Edit Authorizations" /></p>
+
+      </form>
+    </div>
+      <p><small>The time is <%= hk_time_fmt %> - <a href="/gettime">Update</a></small></p>
   </body>
 </html>
 

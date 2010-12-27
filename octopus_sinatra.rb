@@ -193,18 +193,23 @@ post '/action' do
       # ------------------------------------------
       shellfm_trigger(name)
       hall_light_trigger
-    when "Turn on Hall Light"
+    when "Turn Hall Light [ON]"
       unless $hall_light_on
         $k8055.set_digital HallLightChannel, false
         $hall_light_on = true
         message = "Hall light is on."
       end
-    when "Turn off Hall Light"
+    when "Turn Hall Light [OFF]"
       if $hall_light_on
         $k8055.set_digital HallLightChannel, false
         $hall_light_on = false
         message = "Hall light is off."
       end
+    when "Edit Authorizations"
+      # Edit authorized users list
+      @filename = File.join(File.dirname(__FILE__), "authorized_users.yml")
+      @data = File.open(@filename, "r").read
+      return erb :edit_users
     end
 
     # Display LCD message for action
@@ -227,14 +232,6 @@ get '/gettime' do
   return ""
 end
 
-
-# Shows a simple form to edit the alarms.yml file for the shellfm_lcd_console
-get '/edit_users' do
-  @filename = File.join(File.dirname(__FILE__), "authorized_users.yml")
-  @data = File.open(@filename, "r").read
-
-  erb :edit_users
-end
 post '/edit_users' do
   @filename = File.join(File.dirname(__FILE__), "authorized_users.yml")
   user = $users[params[:user]]
