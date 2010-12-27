@@ -105,7 +105,8 @@ def shellfm_trigger(name)
         station = stations[rand(stations.size)]
         base_url = URI.parse("http://music-10c/")
         successful = false
-        while !successful
+        # Try talk to shell.fm 3 times.
+        3.times do
           begin
             res = Net::HTTP.start(base_url.host, base_url.port) {|http|
               http.get("/play_station_if_idle?station=#{station}")
@@ -114,6 +115,7 @@ def shellfm_trigger(name)
           rescue
             # Request timed out, try again.
           end
+          break if successful
         end
       end
     end
@@ -159,8 +161,8 @@ get '/octopus/:id' do
 
     # Post unlock actions
     # ------------------------------------------
-    shellfm_trigger(name)
     hall_light_trigger
+    shellfm_trigger(name)
   else
     access_denied_action
     $lastOctopusID = params[:id]
@@ -191,8 +193,8 @@ post '/action' do
 
       # Post unlock actions
       # ------------------------------------------
-      shellfm_trigger(name)
       hall_light_trigger
+      shellfm_trigger(name)
     when "Turn Hall Light [ON]"
       unless $hall_light_on
         $k8055.set_digital HallLightChannel, false
