@@ -20,8 +20,11 @@ $users = YAML.load_file(relative("authorized_users.yml"))
 
 SwitchChannel = $config["SwitchChannel"]
 GreenChannel = $config["GreenChannel"]
-RedChannel = $config["RedChannel"]
-BuzzerChannel = $config["BuzzerChannel"]
+AlarmChannel = $config["AlarmChannel"]
+HallLightChannel = $config["HallLightChannel"]
+
+$hall_light_on = false
+$hall_light_thread = nil
 
 SwitchDelay = $config["SwitchDelay"]
 MsgDelay = $config["MsgDelay"]
@@ -59,14 +62,22 @@ end
 
 def access_denied_action
   Thread.new do
-    $k8055.set_digital RedChannel, false
-    $k8055.set_digital BuzzerChannel, false
+    $k8055.set_digital AlarmChannel, false
     # Flash buzzer on and off 5 times
     9.times do
       sleep 0.2
-      $k8055.set_digital BuzzerChannel, false
+      $k8055.set_digital AlarmChannel, false
     end
-    $k8055.set_digital RedChannel, false
+  end
+end
+
+def hall_light_timed_action(on_time)
+  return Thread.new do
+    $k8055.set_digital HallLightChannel, false
+    $hall_light_on = true
+    sleep (on_time) # Sleep for x seconds, then turn off light.
+    $k8055.set_digital HallLightChannel, false
+    $hall_light_on = false
   end
 end
 
@@ -109,6 +120,14 @@ def shellfm_trigger(name)
   end
 end
 
+def hall_light_trigger
+  # If its past 10pm, and before 8am, turn on the hall light for 15 minutes.
+  time = hk_time
+  if time.hour >= 22 or time.hour <= 8
+    $hall_light_thread = hall_light_timed_action(60 * 15)
+  end
+end
+
 # Loop until devices are connected
 l_connect = false
 
@@ -137,7 +156,11 @@ get '/octopus/:id' do
     message = "  [#{params[:id]}]  " +
               "Welcome, #{name.split.first}!"
     lcd_message message, 1, 40, true
+
+    # Post unlock actions
+    # ------------------------------------------
     shellfm_trigger(name)
+    hall_light_trigger
   else
     access_denied_action
     $lastOctopusID = params[:id]
@@ -152,17 +175,52 @@ post '/unlock' do
   # If user can authenticate
   user = $users[params[:user]]
   if user && user['http_pwd'] && user['http_pwd'] == params[:password]
-    unlock_door_action
     name = params[:user]
-
+    unlock_door_action
     lcd_message "  HTTP - #{ @env['REMOTE_ADDR'] } ", 1, 20, false
     message = "Welcome, #{name.split.first}!"
     lcd_message message, 21, 40, true
+
+    # Post unlock actions
+    # ------------------------------------------
+    shellfm_trigger(name)
+    hall_light_trigger
   else
     access_denied_action
     lcd_message "  HTTP - #{ @env['REMOTE_ADDR'] } ", 1, 20, false
     message = "  Access Denied."
     lcd_message message, 21, 40, true
+  end
+
+  return "<html><body><p>HTTP - #{ @env['REMOTE_ADDR'] }</p><h2>#{message}</h2></body></html>"
+
+end
+
+post '/hall_light' do
+  # If user can authenticate
+  user = $users[params[:user]]
+
+  message = "Nothing Changed."
+  if user && user['http_pwd'] && user['http_pwd'] == params[:password]
+    # Kill hall light timed thread, if running
+    $hall_light_thread.kill if $hall_light_thread
+    $hall_light_thread = nil
+
+    if params[:hall_light] = "ON"
+      unless $hall_light_on
+        $k8055.set_digital HallLightChannel, false
+        $hall_light_on = true
+        message = "Hall light is now on."
+      end
+    else
+      if $hall_light_on
+        $k8055.set_digital HallLightChannel, false
+        $hall_light_on = false
+        message = "Hall light is now off."
+      end
+    end
+  else
+    message = "Access Denied."
   end
 
   return "<html><body><p>HTTP - #{ @env['REMOTE_ADDR'] }</p><h2>#{message}</h2></body></html>"
