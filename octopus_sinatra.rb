@@ -22,8 +22,9 @@ SwitchChannel = $config["SwitchChannel"]
 GreenChannel = $config["GreenChannel"]
 AlarmChannel = $config["AlarmChannel"]
 HallLightChannel = $config["HallLightChannel"]
+FanChannel = $config["FanChannel"]
 
-$hall_light_on = false
+$hall_light_on, $fan_on = false, false
 $hall_light_thread = nil
 
 SwitchDelay = $config["SwitchDelay"]
@@ -211,6 +212,18 @@ post '/action' do
     when "Keep Hall Light [ON]"
       # Hall light thread is already killed above.
       @message = "Light will stay on."
+    when "Turn Fan [ON]"
+      unless $fan_on
+        $k8055.set_digital FanChannel, false
+        $fan_on = true
+        @message = "Fan is on."
+      end
+    when "Turn Fan [OFF]"
+      if $fan_on
+        $k8055.set_digital FanChannel, false
+        $fan_on = false
+        @message = "Fan is off."
+      end
     when "Edit Authorizations"
       # Edit authorized users list
       @filename = File.join(File.dirname(__FILE__), "authorized_users.yml")

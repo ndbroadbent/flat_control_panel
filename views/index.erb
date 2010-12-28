@@ -44,8 +44,15 @@
           <% end %>
           </li>
           <% if $hall_light_thread %>
-            <input type="submit" name="action" class="action" value="Keep Hall Light [ON]" />
+            <li><input type="submit" name="action" class="action" value="Keep Hall Light [ON]" /></li>
           <% end %>
+          <li>
+          <% if $fan_on %>
+            <input type="submit" name="action" class="action" value="Turn Fan [OFF]" />
+          <% else %>
+            <input type="submit" name="action" class="action" value="Turn Fan [ON]" />
+          <% end %>
+          </li>
         </ul>
 
         <hr/>
