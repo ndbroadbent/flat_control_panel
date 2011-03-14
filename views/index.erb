@@ -28,7 +28,7 @@
         <ul class="login_fields">
           <li>Password:</li>
           <li>
-            <input type="password" name="password" />
+            <input type="password" name="password" value="<%= @password %>"/>
           </li>
         </ul>
 
@@ -52,6 +52,8 @@
           <% else %>
             <input type="submit" name="action" class="action" value="Turn Fan [ON]" />
           <% end %>
+          </li>
+          <li>
           <% if $umbrella_on %>
             <input type="submit" name="action" class="action" value="Turn Umbrella Bucket [OFF]" />
           <% else %>

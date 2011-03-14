@@ -84,7 +84,7 @@ def hall_light_timed_action(on_time)
 end
 
 def user_select_options
-  $users.map {|name, params| "<option value=\"#{name}\">#{name}</option>" }.join
+  $users.map {|name, params| "<option #{name == @user ? 'selected="true"' : ''}value=\"#{name}\">#{name}</option>" }.join
 end
 
 # Evo T20 is synced to UTC. HK time is UTC +8
@@ -149,6 +149,7 @@ lcd_default
 
 
 get '/' do
+  @user, @password = "", ""
   erb :index
 end
 
@@ -181,6 +182,9 @@ post '/action' do
   # If user can authenticate
   user = $users[params[:user]]
   if user && user['http_pwd'] && user['http_pwd'] == params[:password]
+    # save user and password in returned page
+    @user, @password = params[:user], params[:password]
+
     # Process requested action.
 
     # Kill hall light timed thread, if running

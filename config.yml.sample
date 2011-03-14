@@ -4,7 +4,7 @@ GreenChannel: 2
 AlarmChannel: 3
 HallLightChannel: 4
 FanChannel: 5
-UmbrellaChannel: 6
+UmbrellaChannel: 7
 
 SwitchDelay: 0.5
 MsgDelay: 2.5
