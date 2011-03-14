@@ -4,6 +4,7 @@ GreenChannel: 2
 AlarmChannel: 3
 HallLightChannel: 4
 FanChannel: 5
+UmbrellaChannel: 6
 
 SwitchDelay: 0.5
 MsgDelay: 2.5
@@ -12,4 +13,12 @@ octopus_devnode: "/dev/octopus"
 lcd_devnode: "/dev/lcddisplay"
 
 sinatra_base_url: "http://localhost:80"
+
+
+weather_station: CHXX0049
+weather_partner_id: xxxxxxxxxxxxxxxxx
+weather_license_key: xxxxxxxxxxxxxxxx
+
+# Percentage chance of rain to turn on the umbrella warning.
+ppcp_threshold: 60
 

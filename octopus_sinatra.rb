@@ -23,8 +23,9 @@ GreenChannel = $config["GreenChannel"]
 AlarmChannel = $config["AlarmChannel"]
 HallLightChannel = $config["HallLightChannel"]
 FanChannel = $config["FanChannel"]
+UmbrellaChannel = $config["UmbrellaChannel"]
 
-$hall_light_on, $fan_on = false, false
+$hall_light_on, $fan_on, $umbrella_on = false, false, false
 $hall_light_thread = nil
 
 SwitchDelay = $config["SwitchDelay"]
@@ -163,7 +164,9 @@ get '/octopus/:id' do
     # Post unlock actions
     # ------------------------------------------
     hall_light_trigger unless $hall_light_on
-    shellfm_trigger(name)
+
+    # --- No more shell.fm. XBMC is bigger and better :)
+    # shellfm_trigger(name)
   else
     access_denied_action
     $lastOctopusID = params[:id]
@@ -196,7 +199,8 @@ post '/action' do
       # Post unlock actions
       # ------------------------------------------
       hall_light_trigger unless $hall_light_on
-      shellfm_trigger(name)
+
+      # shellfm_trigger(name)
     when "Turn Hall Light [ON]"
       unless $hall_light_on
         $k8055.set_digital HallLightChannel, false
@@ -224,6 +228,18 @@ post '/action' do
         $fan_on = false
         @message = "Fan is off."
       end
+    when "Turn Umbrella Bucket [ON]"
+      unless $umbrella_on
+        $k8055.set_digital UmbrellaChannel, false
+        $umbrella_on = true
+        @message = "Umbrella bucket is on."
+      end
+    when "Turn Umbrella Bucket [OFF]"
+      if $umbrella_on
+        $k8055.set_digital UmbrellaChannel, false
+        $umbrella_on = false
+        @message = "Umbrella bucket is off."
+      end
     when "Edit Authorizations"
       # Edit authorized users list
       @filename = File.join(File.dirname(__FILE__), "authorized_users.yml")
@@ -242,6 +258,21 @@ post '/action' do
   end
 
   erb :index
+end
+
+get '/umbrella_bucket/:state' do
+  case params[:state]
+  when "on"
+    unless $umbrella_on
+      $k8055.set_digital UmbrellaChannel, false
+      $umbrella_on = true
+    end
+  when "off"
+    if $umbrella_on
+      $k8055.set_digital UmbrellaChannel, false
+      $umbrella_on = false
+    end
+  end
 end
 
 # To manually update time.
