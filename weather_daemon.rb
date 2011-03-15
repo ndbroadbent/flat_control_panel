@@ -22,6 +22,11 @@ def hk_time
   Time.now + 8*60*60
 end
 
+def f_to_c(f)
+  ((f.to_f - 32.0) * (5.0 / 9.0)).to_i
+end
+
+
 while true
   begin
     # get the XML data as a string
@@ -31,8 +36,10 @@ while true
     doc = REXML::Document.new(xml_data)
     ppcp_hash = {}
     doc.elements.each('//dayf/day/part') do |el|
-      ppcp_hash[el.attributes['p']] = el.elements["ppcp"].text
+      ppcp_hash[el.attributes['p']] = el.elements["ppcp"].text.to_i
     end
+    # Get the high temperature for the day.
+    hi_temp = doc.elements["//dayf/day/hi"].text.to_i
 
     # If the time is after 7pm, use the night ppcp.
     # Else, use the day ppcp.
@@ -40,7 +47,7 @@ while true
 
     res = Net::HTTP.start(base_url.host, base_url.port) do |http|
       # If there is a chance of rain (ppcp > ppcp_threshold), turn on the umbrella bucket lights.
-      if ppcp.to_i > config["ppcp_threshold"].to_i
+      if ppcp > config["ppcp_threshold"]
         http.get("/umbrella_bucket/on")
       # If not, turn it off.
       else
