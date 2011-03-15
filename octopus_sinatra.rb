@@ -15,7 +15,7 @@ require 'net/http'
 require 'uri'
 
 # Load $config.
-$config = YAML.load_file(relative("config.yml"))
+$config = YAML.load_file(relative("config/config.yml"))
 $users = YAML.load_file(relative("authorized_users.yml"))
 
 SwitchChannel = $config["SwitchChannel"]

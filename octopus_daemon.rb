@@ -11,7 +11,7 @@ require 'yaml'
 require 'net/http'
 require 'uri'
 
-config = YAML.load_file relative("config.yml")
+config = YAML.load_file relative("config/config.yml")
 base_url = URI.parse(config['sinatra_base_url'])
 
 while true

@@ -12,7 +12,7 @@ require 'uri'
 require 'rexml/document'
 
 
-config = YAML.load_file relative("config.yml")
+config = YAML.load_file relative("config/config.yml")
 base_url = URI.parse(config['sinatra_base_url'])
 
 weather_xoap_url = "http://xoap.weather.com/weather/local/#{config["weather_station"]}?dayf=1&link=xoap&prod=xoap&par=#{config["weather_partner_id"]}&key=#{config["weather_license_key"]}"
