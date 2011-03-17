@@ -16,7 +16,7 @@ require 'uri'
 
 # Load $config.
 $config = YAML.load_file(relative("config/config.yml"))
-$users = YAML.load_file(relative("authorized_users.yml"))
+$users = YAML.load_file(relative("config/authorized_users.yml"))
 
 SwitchChannel = $config["SwitchChannel"]
 GreenChannel = $config["GreenChannel"]
@@ -101,7 +101,7 @@ def shellfm_trigger(name)
   # (and if the time is reasonable.)
   time = hk_time
   if time.hour >= 7 and time.hour <= 22
-    if radio_prefs = YAML.load_file(relative("user_radio_prefs.yml"))
+    if radio_prefs = YAML.load_file(relative("config/user_radio_prefs.yml"))
       if stations = radio_prefs[name]
         # Pick a random station, and play it.
         station = stations[rand(stations.size)]
