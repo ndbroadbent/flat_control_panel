@@ -246,7 +246,7 @@ post '/action' do
       end
     when "Edit Authorizations"
       # Edit authorized users list
-      @filename = File.join(File.dirname(__FILE__), "authorized_users.yml")
+      @filename = File.join(File.dirname(__FILE__), "config/authorized_users.yml")
       @data = File.open(@filename, "r").read
       return erb :edit_users
     end
@@ -286,7 +286,7 @@ get '/gettime' do
 end
 
 post '/edit_users' do
-  @filename = File.join(File.dirname(__FILE__), "authorized_users.yml")
+  @filename = File.join(File.dirname(__FILE__), "config/authorized_users.yml")
   user = $users[params[:user]]
   if user && user['http_pwd'] && user['http_pwd'] == params[:password]
     File.open(@filename, "w") do |f|
