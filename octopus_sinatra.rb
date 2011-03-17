@@ -96,8 +96,8 @@ def hk_time_fmt
   hk_time.strftime("%Y-%m-%d %H:%M:%S")
 end
 
-def shellfm_trigger(name)
-  # Send a trigger to shell-fm server if user has any configured radio preferences.
+def xbmc_trigger(name)
+  # Send a trigger to xbmc server if user has any configured radio preferences.
   # (and if the time is reasonable.)
   time = hk_time
   if time.hour >= 7 and time.hour <= 22
@@ -105,19 +105,18 @@ def shellfm_trigger(name)
       if stations = radio_prefs[name]
         # Pick a random station, and play it.
         station = stations[rand(stations.size)]
-        base_url = URI.parse("http://music-10c/")
-        successful = false
-        # Try talk to shell.fm 3 times.
-        3.times do
-          begin
-            res = Net::HTTP.start(base_url.host, base_url.port) {|http|
-              http.get("/play_station_if_idle?station=#{station}")
-            }
-            successful = true
-          rescue
-            # Request timed out, try again.
+        url = URI.parse($config["xbmc_url"])
+        req = Net::HTTP::Post.new(url.path)
+        req.basic_auth $config["xbmc_username"], $config["xbmc_password"]
+        req.add_field 'Content-Type', 'application/json'
+        req.body = '{"method":"XBMC.Play","params":{"file":"#{station}"},"id":1,"jsonrpc":"2.0"}'
+        begin
+          res = Net::HTTP.new(url.host, url.port).start do |http|
+            # Don't need to stick around for the response.
+            http.read_timeout = 2
+            http.request(req)
           end
-          break if successful
+        rescue
         end
       end
     end
@@ -166,8 +165,8 @@ get '/octopus/:id' do
     # ------------------------------------------
     hall_light_trigger unless $hall_light_on
 
-    # --- No more shell.fm. XBMC is bigger and better :)
-    # shellfm_trigger(name)
+    # --- Start playing some lastfm on xbmc, if appropriate time.
+    xbmc_trigger(name)
   else
     access_denied_action
     $lastOctopusID = params[:id]
@@ -204,7 +203,7 @@ post '/action' do
       # ------------------------------------------
       hall_light_trigger unless $hall_light_on
 
-      # shellfm_trigger(name)
+      xbmc_trigger(name)
     when "Turn Hall Light [ON]"
       unless $hall_light_on
         $k8055.set_digital HallLightChannel, false
