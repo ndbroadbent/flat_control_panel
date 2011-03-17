@@ -20,5 +20,5 @@ weather_partner_id: xxxxxxxxxxxxxxxxx
 weather_license_key: xxxxxxxxxxxxxxxx
 
 # Percentage chance of rain to turn on the umbrella warning.
-ppcp_threshold: 60
+ppcp_threshold: 40
 

@@ -41,9 +41,9 @@ while true
     # Get the high temperature for the day.
     hi_temp = doc.elements["//dayf/day/hi"].text.to_i
 
-    # If the time is after 7pm, use the night ppcp.
+    # If the time is after 7pm or before 7am, use the night ppcp.
     # Else, use the day ppcp.
-    ppcp = hk_time.hour >= 19 ? ppcp_hash["n"] : ppcp_hash["d"]
+    ppcp = (hk_time.hour >= 19 or hk_time.hour < 7) ? ppcp_hash["n"] : ppcp_hash["d"]
 
     res = Net::HTTP.start(base_url.host, base_url.port) do |http|
       # If there is a chance of rain (ppcp > ppcp_threshold), turn on the umbrella bucket lights.
