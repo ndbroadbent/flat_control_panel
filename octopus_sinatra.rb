@@ -6,8 +6,10 @@ end
 
 require 'rubygems'
 require 'rubyk8055'
-require relative('dsp420.rb')
+require relative('dsp420')
 include USB
+require relative('xbmc')
+include XBMC
 
 require 'sinatra'
 require 'yaml'
@@ -98,26 +100,17 @@ end
 
 def xbmc_trigger(name)
   # Send a trigger to xbmc server if user has any configured radio preferences.
-  # (and if the time is reasonable.)
+  # (and if the time is reasonable. AND if nothing is already playing on XBMC.)
   time = hk_time
-  if time.hour >= 7 and time.hour <= 22
+  if time.hour >= 7 and time.hour <= 22 and not xbmc_playing?
     if radio_prefs = YAML.load_file(relative("config/user_radio_prefs.yml"))
       if stations = radio_prefs[name]
         # Pick a random station, and play it.
         station = stations[rand(stations.size)]
-        url = URI.parse($config["xbmc_url"])
-        req = Net::HTTP::Post.new(url.path)
-        req.basic_auth $config["xbmc_username"], $config["xbmc_password"]
-        req.add_field 'Content-Type', 'application/json'
-        req.body = '{"method":"XBMC.Play","params":{"file":"#{station}"},"id":1,"jsonrpc":"2.0"}'
-        begin
-          res = Net::HTTP.new(url.host, url.port).start do |http|
-            # Don't need to stick around for the response.
-            http.read_timeout = 2
-            http.request(req)
-          end
-        rescue
-        end
+        # Set volume to 45
+        xbmc_api("XBMC.SetVolume", '"number":"45"')
+        # Play the station.
+        xbmc_api("XBMC.Play", %Q{"file":"#{station.gsub(" ", "%20")}"}, :ignore)
       end
     end
   end
