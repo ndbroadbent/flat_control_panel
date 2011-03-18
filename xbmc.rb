@@ -1,5 +1,5 @@
 module XBMC
-  def xbmc_api(method, params, ignore_response=false)
+  def xbmc_api(method, params="{}", ignore_response=false)
     url = URI.parse($config["xbmc_url"])
     req = Net::HTTP::Post.new(url.path)
     req.basic_auth $config["xbmc_username"], $config["xbmc_password"]
@@ -20,7 +20,7 @@ module XBMC
   end
 
   def xbmc_playing?
-    players = eval(xbmc_api("Player.GetActivePlayers", "").body.gsub(":", "=>"))["result"]
+    players = eval(xbmc_api("Player.GetActivePlayers").body.gsub(":", "=>"))["result"]
     player = if players["audio"]
       "AudioPlayer"
     elsif players["video"]
@@ -29,7 +29,7 @@ module XBMC
       nil
     end
     return false unless player
-    return !eval(xbmc_api("#{player}.State", "").body.gsub(":", "=>"))["result"]["paused"]
+    return !eval(xbmc_api("#{player}.State").body.gsub(":", "=>"))["result"]["paused"]
   end
 end
 
