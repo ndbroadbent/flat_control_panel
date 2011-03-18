@@ -108,9 +108,9 @@ def xbmc_trigger(name)
         # Pick a random station, and play it.
         station = stations[rand(stations.size)]
         # Set volume to 45
-        xbmc_api("XBMC.SetVolume", %Q{"40"})
+        xbmc_api("XBMC.SetVolume", %Q["40"])
         # Play the station.
-        xbmc_api("XBMC.Play", %Q{"file":"#{station.gsub(" ", "%20")}"}, :ignore)
+        xbmc_api("XBMC.Play", %Q[{"file":"#{station.gsub(" ", "%20")}"}], :ignore)
       end
     end
   end

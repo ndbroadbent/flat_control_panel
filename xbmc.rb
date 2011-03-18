@@ -4,7 +4,7 @@ module XBMC
     req = Net::HTTP::Post.new(url.path)
     req.basic_auth $config["xbmc_username"], $config["xbmc_password"]
     req.add_field 'Content-Type', 'application/json'
-    req.body = %Q[{"method":"#{method}","params":{#{params}},"id":1,"jsonrpc":"2.0"}]
+    req.body = %Q[{"method":"#{method}","params":#{params},"id":1,"jsonrpc":"2.0"}]
     begin
       # fetch ip from system nslookup. ruby seems to hang a lot on DNS lookups.
       if ip_addr = `nslookup #{url.host}`[Regexp.new('Address 1: (\d+\.\d+\.\d+\.\d+) ' << url.host), 1]
