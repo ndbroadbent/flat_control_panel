@@ -19,13 +19,17 @@ module XBMC
     return ignore_response ? true : res
   end
 
+  def xbmc_active_players
+    eval(xbmc_api("Player.GetActivePlayers").body.gsub(":", "=>"))["result"]
+  end
+
   def xbmc_playing?
     xbmc_audio_playing? || xbmc_video_playing?
   end
 
   def xbmc_audio_playing?
-    players = eval(xbmc_api("Player.GetActivePlayers").body.gsub(":", "=>"))["result"]
-    players["audio"] && !eval(xbmc_api("AudioPlayer.State").body.gsub(":", "=>"))["result"]["paused"]
+    xbmc_active_players["audio"] && \
+    !eval(xbmc_api("AudioPlayer.State").body.gsub(":", "=>"))["result"]["paused"]
   end
 
   # The following two methods are not the inverse of each other, since they are
@@ -41,12 +45,11 @@ module XBMC
   # => nothing playing, and video not paused => !xbmc_playing? && !xbmc_video_paused?
 
   def xbmc_video_playing?
-    players = eval(xbmc_api("Player.GetActivePlayers").body.gsub(":", "=>"))["result"]
-    players["video"] && !eval(xbmc_api("VideoPlayer.State").body.gsub(":", "=>"))["result"]["paused"]
+    xbmc_active_players["video"] && \
+    !eval(xbmc_api("VideoPlayer.State").body.gsub(":", "=>"))["result"]["paused"]
   end
   def xbmc_video_paused?
-    players = eval(xbmc_api("Player.GetActivePlayers").body.gsub(":", "=>"))["result"]
-    return false unless players["video"]
+    return false unless xbmc_active_players["video"]
     return eval(xbmc_api("VideoPlayer.State").body.gsub(":", "=>"))["result"]["paused"]
   end
 
