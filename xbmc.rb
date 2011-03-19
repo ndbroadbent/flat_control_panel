@@ -20,16 +20,35 @@ module XBMC
   end
 
   def xbmc_playing?
-    players = eval(xbmc_api("Player.GetActivePlayers").body.gsub(":", "=>"))["result"]
-    player = if players["audio"]
-      "AudioPlayer"
-    elsif players["video"]
-      "VideoPlayer"
-    else
-      nil
-    end
-    return false unless player
-    return !eval(xbmc_api("#{player}.State").body.gsub(":", "=>"))["result"]["paused"]
+    xbmc_audio_playing? || xbmc_video_playing?
   end
+
+  def xbmc_audio_playing?
+    players = eval(xbmc_api("Player.GetActivePlayers").body.gsub(":", "=>"))["result"]
+    players["audio"] && !eval(xbmc_api("AudioPlayer.State").body.gsub(":", "=>"))["result"]["paused"]
+  end
+
+  # The following two methods are not the inverse of each other, since they are
+  # dealing with the boolean representation of three separate states.
+  # ----------------------------------------------------------------------------
+  #    playing,  !paused, !stopped =>  xbmc_video_playing?
+  #   !playing,   paused,  stopped => !xbmc_video_playing?
+  #   !playing,   paused, !stopped =>  xbmc_video_paused?
+  #    playing,  !paused,  stopped => !xbmc_video_paused?
+  #
+  #   !playing,  !paused,  stopped => !xbmc_video_playing && !xbmc_video_paused
+  # ----------------------------------------------------------------------------
+  # => nothing playing, and video not paused => !xbmc_playing? && !xbmc_video_paused?
+
+  def xbmc_video_playing?
+    players = eval(xbmc_api("Player.GetActivePlayers").body.gsub(":", "=>"))["result"]
+    players["video"] && !eval(xbmc_api("VideoPlayer.State").body.gsub(":", "=>"))["result"]["paused"]
+  end
+  def xbmc_video_paused?
+    players = eval(xbmc_api("Player.GetActivePlayers").body.gsub(":", "=>"))["result"]
+    return false unless players["video"]
+    return eval(xbmc_api("VideoPlayer.State").body.gsub(":", "=>"))["result"]["paused"]
+  end
+
 end
 

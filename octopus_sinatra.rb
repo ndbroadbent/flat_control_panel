@@ -102,7 +102,7 @@ def xbmc_trigger(name)
   # Send a trigger to xbmc server if user has any configured radio preferences.
   # (and if the time is reasonable. AND if nothing is already playing on XBMC.)
   time = hk_time
-  if time.hour >= 7 and time.hour <= 22 and not xbmc_playing?
+  if time.hour >= 7 and time.hour <= 22 and not xbmc_playing? and not xbmc_video_paused?
     if radio_prefs = YAML.load_file(relative("config/user_radio_prefs.yml"))
       if stations = radio_prefs[name]
         # Pick a random station, and play it.
