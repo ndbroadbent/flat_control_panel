@@ -50,7 +50,7 @@ module XBMC
   end
   def xbmc_video_paused?
     return false unless xbmc_active_players["video"]
-    return eval(xbmc_api("VideoPlayer.State").body.gsub(":", "=>"))["result"]["paused"]
+    eval(xbmc_api("VideoPlayer.State").body.gsub(":", "=>"))["result"]["paused"]
   end
 
 end
