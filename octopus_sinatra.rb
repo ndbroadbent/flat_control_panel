@@ -39,7 +39,10 @@ $k8055.clear_all_digital
 
 $lastOctopusID = ""
 
+$lcdTimeThread = nil
+
 def lcd_message(str, s_pos=21, e_pos=40, timeout=true)
+  $lcdTimeThread.kill
   $dsp420.write str, s_pos, e_pos
   if timeout
     sleep MsgDelay
@@ -48,8 +51,16 @@ def lcd_message(str, s_pos=21, e_pos=40, timeout=true)
 end
 
 def lcd_default   # Default lcd display
-  lcd_message " ==== Flat 10C ==== ", 1, 20, false
+  lcd_message "Flat 10C  -", 1, 20, false
   lcd_message " Octopus / Internet ", 21, 40, false
+  $lcdTimeThread = Thread.new do
+    while true
+      lcd_message hk_time_lcd_fmt(":"), 14, 20
+      sleep 1
+      lcd_message hk_time_lcd_fmt(" "), 14, 20
+      sleep 1
+    end
+  end
 end
 
 def unlock_door_action
@@ -96,6 +107,13 @@ end
 
 def hk_time_fmt
   hk_time.strftime("%Y-%m-%d %H:%M:%S")
+end
+
+def hk_time_lcd_fmt(separator="")
+  time = hk_time
+  hour, minute = time.hour, time.min
+  hour, suffix = hour > 12 ? [hour - 12, "pm"] : [hour, "am"]
+  "%02d#{separator}%02d%s" % [hour, minute, suffix]
 end
 
 def xbmc_trigger(name)
