@@ -58,6 +58,12 @@ namespace :processes do
 end
 
 # ------------------------------------------------------
+desc "Update time from internet"
+task :update_time, :hosts => "#{hostname}" do
+  sudo "getTime.sh"
+end
+
+# ------------------------------------------------------
 desc "Package and install the application on your iPhone"
 task :deploy, :hosts => "#{hostname}" do
   build_package
