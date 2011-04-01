@@ -12,8 +12,9 @@ set :current_path, "#{deploy_to}/#{application}"
 desc "Package application"
 task :build_package do
   puts "== Packaging application..."
+  exclude = %w(.git config/config.yml config/authorized_users.yml config/user_radio_prefs.yml *.tar.gz)
   %x[cd #{local_path} && \
-    tar -czpvf /tmp/#{application}.tar.gz #{local_path} --exclude=.git]
+    tar -czpvf /tmp/#{application}.tar.gz #{local_path} #{exclude.map{|e|"--exclude=#{e}"}.join(" ")}]
   puts "===== #{application}.tar.gz was created."
 end
 
