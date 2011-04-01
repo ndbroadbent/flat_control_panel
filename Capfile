@@ -59,8 +59,8 @@ namespace :processes do
 end
 
 # ------------------------------------------------------
-desc "Update time from internet"
-task :update_time, :hosts => "#{hostname}" do
+desc "Update time from internet NTP server"
+task :getTime, :hosts => "#{hostname}" do
   sudo "getTime.sh"
 end
 
@@ -72,5 +72,6 @@ task :deploy, :hosts => "#{hostname}" do
   install
   symlink_shared
   processes.restart
+  getTime
 end
 
