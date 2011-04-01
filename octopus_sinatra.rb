@@ -39,7 +39,14 @@ $k8055.clear_all_digital
 
 $lastOctopusID = ""
 
+$lcdTimeThread = nil
+
 def lcd_message(str, s_pos=21, e_pos=40, timeout=true)
+  # Kill 'clock' thread before writing message.
+  if $lcdTimeThread
+    $lcdTimeThread.kill
+    $lcdTimeThread = nil
+  end
   $dsp420.write str, s_pos, e_pos
   if timeout
     sleep MsgDelay
@@ -48,8 +55,34 @@ def lcd_message(str, s_pos=21, e_pos=40, timeout=true)
 end
 
 def lcd_default   # Default lcd display
-  lcd_message " ==== Flat 10C ==== ", 1, 20, false
-  lcd_message " Octopus / Internet ", 21, 40, false
+  lcd_message "Flat 10C -=-        ", 1, 20, false
+
+  time = hk_time
+  motd = case [time.day, time.month]
+    when [25, 12] then "  Merry Christmas!  "
+    when easter(time.year) then "  Jesus is Alive!   "
+    when [5,  10] then " Happy B'day Masha! "
+    when [3,  6]  then "Happy B'day Nathan! "
+    else " Octopus & Internet "    # else, default message
+  end
+  lcd_message motd, 21, 40, false
+
+  $lcdTimeThread = Thread.new {
+    while true
+      $dsp420.write hk_time_lcd_fmt(":"), 14, 20, false
+      sleep 1
+      $dsp420.write hk_time_lcd_fmt(" "), 14, 20, false
+      sleep 1
+    end
+  }
+end
+
+# Every good program should calculate the date of Easter at least once.
+def easter(year)
+  c=year/100;n=year-19*(year/19);k=(c-17)/25;i=c-c/4-(c-k)/3+19*n+15;i-=30*(i/30);
+  i-=(i/28)*(1 -(i/28)*(29/(i+1))*((21-n)/11));j=year+year/4+i+2-c+c/4;j-=7*(j/7);
+  l=i-j;month=3+(l+40)/44;day=l+28-31*(month/4);
+  [day, month]
 end
 
 def unlock_door_action
@@ -89,28 +122,36 @@ def user_select_options
   $users.map {|name, params| "<option #{name == @user ? 'selected="true"' : ''}value=\"#{name}\">#{name}</option>" }.join
 end
 
-# Evo T20 is synced to UTC. HK time is UTC +8
+# Evo T20 is synced to UTC. HK time is UTC - 3 hours
 def hk_time
-  Time.now + 8*60*60
+  Time.now - 3*60*60
 end
 
 def hk_time_fmt
   hk_time.strftime("%Y-%m-%d %H:%M:%S")
 end
 
+def hk_time_lcd_fmt(separator=":")
+  time = hk_time
+  hour, minute = time.hour, time.min
+  hour, suffix = hour >= 12 ? [hour - 12, "pm"] : [hour, "am"]
+  hour = 12 if hour == 0
+  "%2d#{separator}%02d%s" % [hour, minute, suffix]
+end
+
 def xbmc_trigger(name)
   # Send a trigger to xbmc server if user has any configured radio preferences.
   # (and if the time is reasonable. AND if nothing is already playing on XBMC.)
   time = hk_time
-  if time.hour >= 7 and time.hour <= 22 and not xbmc_playing?
+  if time.hour >= 7 and time.hour <= 22 and not xbmc_playing? and not xbmc_video_paused?
     if radio_prefs = YAML.load_file(relative("config/user_radio_prefs.yml"))
       if stations = radio_prefs[name]
         # Pick a random station, and play it.
         station = stations[rand(stations.size)]
         # Set volume to 45
-        xbmc_api("XBMC.SetVolume", '"number":"45"')
+        xbmc_api("XBMC.SetVolume", 40)
         # Play the station.
-        xbmc_api("XBMC.Play", %Q{"file":"#{station.gsub(" ", "%20")}"}, :ignore)
+        xbmc_api("XBMC.Play", %Q[{"file":"#{station.gsub(" ", "%20")}"}], :ignore)
       end
     end
   end
