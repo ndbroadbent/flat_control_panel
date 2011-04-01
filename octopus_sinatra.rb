@@ -124,7 +124,7 @@ end
 
 # Evo T20 is synced to UTC. HK time is UTC - 3 hours
 def hk_time
-  Time.now - 3*60*60
+  Time.now + 8*60*60
 end
 
 def hk_time_fmt
