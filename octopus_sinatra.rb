@@ -41,6 +41,18 @@ $lastOctopusID = ""
 
 $lcdTimeThread = nil
 
+# A custom default message, based on the current date
+def motd
+  time = hk_time
+  return case [time.day, time.month]
+    when [25, 12] then "  Merry Christmas!  "
+    when easter(time.year) then "  Jesus is Alive!   "
+    when [5,  10] then " Happy B'day Masha! "
+    when [3,  6]  then "Happy B'day Nathan! "
+    else " Octopus & Internet "    # else, default message
+  end
+end
+
 def lcd_message(str, s_pos=21, e_pos=40, timeout=true)
   # Kill 'clock' thread before writing message.
   if $lcdTimeThread
@@ -56,23 +68,19 @@ end
 
 def lcd_default   # Default lcd display
   lcd_message "Flat 10C -=-        ", 1, 20, false
-
-  time = hk_time
-  motd = case [time.day, time.month]
-    when [25, 12] then "  Merry Christmas!  "
-    when easter(time.year) then "  Jesus is Alive!   "
-    when [5,  10] then " Happy B'day Masha! "
-    when [3,  6]  then "Happy B'day Nathan! "
-    else " Octopus & Internet "    # else, default message
-  end
   lcd_message motd, 21, 40, false
 
   $lcdTimeThread = Thread.new {
     while true
-      $dsp420.write hk_time_lcd_fmt(":"), 14, 20, false
+      time = hk_time
+      $dsp420.write lcd_time_fmt(time, ":"), 14, 20, false
       sleep 1
-      $dsp420.write hk_time_lcd_fmt(" "), 14, 20, false
+      $dsp420.write lcd_time_fmt(time, " "), 14, 20, false
       sleep 1
+      # If its the start of a new day, refresh the message.
+      if time.hour == 0 and time.min == 0 and time.sec < 3
+        lcd_message motd, 21, 40, false
+      end
     end
   }
 end
@@ -84,6 +92,8 @@ def easter(year)
   l=i-j;month=3+(l+40)/44;day=l+28-31*(month/4);
   [day, month]
 end
+
+
 
 def unlock_door_action
   Thread.new do
@@ -131,8 +141,7 @@ def hk_time_fmt
   hk_time.strftime("%Y-%m-%d %H:%M:%S")
 end
 
-def hk_time_lcd_fmt(separator=":")
-  time = hk_time
+def lcd_time_fmt(time = hk_time, separator = ":")
   hour, minute = time.hour, time.min
   hour, suffix = hour >= 12 ? [hour - 12, "pm"] : [hour, "am"]
   hour = 12 if hour == 0
