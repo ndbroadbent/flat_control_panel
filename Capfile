@@ -12,8 +12,9 @@ set :current_path, "#{deploy_to}/#{application}"
 desc "Package application"
 task :build_package do
   puts "== Packaging application..."
+  exclude = %w(.git config/config.yml config/authorized_users.yml config/user_radio_prefs.yml *.tar.gz)
   %x[cd #{local_path} && \
-    tar -czpvf /tmp/#{application}.tar.gz #{local_path} --exclude=.git]
+    tar -czpvf /tmp/#{application}.tar.gz #{local_path} #{exclude.map{|e|"--exclude=#{e}"}.join(" ")}]
   puts "===== #{application}.tar.gz was created."
 end
 
@@ -58,8 +59,8 @@ namespace :processes do
 end
 
 # ------------------------------------------------------
-desc "Update time from internet"
-task :update_time, :hosts => "#{hostname}" do
+desc "Update time from internet NTP server"
+task :getTime, :hosts => "#{hostname}" do
   sudo "getTime.sh"
 end
 
@@ -71,5 +72,6 @@ task :deploy, :hosts => "#{hostname}" do
   install
   symlink_shared
   processes.restart
+  getTime
 end
 
