@@ -87,7 +87,7 @@ def lcd_default   # Default lcd display
       sleep 1
       # If its the start of a new day, refresh the message.
       if time.hour == 0 and time.min == 0 and time.sec < 3
-        lcd_message motd, 21, 40, false
+        $dsp420.write motd, 21, 40, false
       end
     end
   }
