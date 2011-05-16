@@ -1,4 +1,21 @@
 h1. Flat Control Panel
 
-Little sinatra app that handles my flat.
+Sinatra app and daemons to handle flat automation.
 
+
+h3.  Unlock front door, turn on lights, turn on fan via:
+
+** RFID card (Octopus)
+** Web interface
+** iPhone app that uses web API
+
+
+h3. Triggers actions when the front door is unlocked.
+
+* When it's daytime, check whether XBMC is currently playing music or video. If not, start playing a Last.FM station.
+* When it's nighttime, turn on the hall light automatically for 15 minutes so I don't stumble around in the dark.
+
+
+h3. Tells me whether or not to take an umbrella to work.
+
+* Periodically checks weather.com for the day's weather. If its going to rain, it switches on some lights in a bucket outside that holds our umbrellas.
