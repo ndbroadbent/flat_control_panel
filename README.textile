@@ -3,11 +3,13 @@ h1. Flat Control Panel
 Sinatra app and daemons to handle flat automation.
 
 
-h3.  Unlock front door, turn on lights, turn on fan via:
+h3.  Unlock front door via:
 
-** RFID card (Octopus)
-** Web interface
-** iPhone app that uses web API
+* RFID card (Octopus)
+* Web interface
+* iPhone app that uses web API
+
+Can also turn on lounge fan, lounge lights, hall lights via the web & iPhone interfaces.
 
 
 h3. Triggers actions when the front door is unlocked.
