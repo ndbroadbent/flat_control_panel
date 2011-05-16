@@ -167,7 +167,7 @@ end
 def hall_light_trigger
   # If its past 10pm, and before 8am, turn on the hall light for 15 minutes.
   time = hk_time
-  if time.hour >= 22 or time.hour <= 8
+  if time.hour >= 19 or time.hour < 7
     $hall_light_thread = hall_light_timed_action(60 * 15)
   end
 end
