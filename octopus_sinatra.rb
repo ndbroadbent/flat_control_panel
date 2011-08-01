@@ -75,12 +75,12 @@ def lcd_message(str, s_pos=21, e_pos=40, timeout=true)
 end
 
 def lcd_default   # Default lcd display
-  lcd_message "-=                =-", 1, 20, false
+  lcd_message "                    ", 1, 20, false
   lcd_message motd, 21, 40, false
 
   $lcdTimeThread = Thread.new {
     while true
-      $dsp420.write lcd_datetime_fmt, 4, 18, false
+      $dsp420.write lcd_datetime_fmt, 1, 20, false
       sleep 60
       # If its the start of a new day, refresh the message.
       if time.hour == 0 and time.min == 0
