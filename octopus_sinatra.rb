@@ -140,7 +140,8 @@ def hk_time_fmt
   hk_time.strftime("%Y-%m-%d %H:%M:%S")
 end
 
-def lcd_time_fmt
+def lcd_time_fmt(separator=":")
+  time = hk_time
   hour, minute = time.hour, time.min
   hour, suffix = hour >= 12 ? [hour - 12, "pm"] : [hour, "am"]
   hour = 12 if hour == 0
