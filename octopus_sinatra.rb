@@ -81,8 +81,9 @@ def lcd_default   # Default lcd display
   $lcdTimeThread = Thread.new {
     while true
       $dsp420.write lcd_datetime_fmt, 1, 20, false
-      sleep 60
+      sleep(60)
       # If its the start of a new day, refresh the message.
+      time = hk_time
       if time.hour == 0 and time.min == 0
         $dsp420.write motd, 21, 40, false
       end
