@@ -57,7 +57,7 @@ def motd
     when easter(time.year) then "  Jesus is Alive!   "
     when [5,  10] then " Happy B'day Masha! "
     when [3,  6]  then "Happy B'day Nathan! "
-    else " Octopus & Internet "    # else, default message
+    else "Flat10C: RFID & HTTP"    # else, default message
   end
 end
 
@@ -75,13 +75,12 @@ def lcd_message(str, s_pos=21, e_pos=40, timeout=true)
 end
 
 def lcd_default   # Default lcd display
-  lcd_message "Flat 10C -=-        ", 1, 20, false
+  lcd_message "-=                =-", 1, 20, false
   lcd_message motd, 21, 40, false
 
   $lcdTimeThread = Thread.new {
     while true
-      time = hk_time
-      $dsp420.write lcd_time_fmt(time, ":"), 14, 20, false
+      $dsp420.write lcd_datetime_fmt, 4, 18, false
       sleep 60
       # If its the start of a new day, refresh the message.
       if time.hour == 0 and time.min == 0
@@ -133,16 +132,25 @@ def hk_time
   Time.now + 8*60*60
 end
 
+def hk_date
+  hk_time.strftime("%d/%m/%Y")
+end
+
 def hk_time_fmt
   hk_time.strftime("%Y-%m-%d %H:%M:%S")
 end
 
-def lcd_time_fmt(time = hk_time, separator = ":")
+def lcd_time_fmt
   hour, minute = time.hour, time.min
   hour, suffix = hour >= 12 ? [hour - 12, "pm"] : [hour, "am"]
   hour = 12 if hour == 0
   "%2d#{separator}%02d%s" % [hour, minute, suffix]
 end
+
+def lcd_datetime_fmt
+  "#{hk_date} - #{lcd_time_fmt}"
+end
+
 
 def xbmc_trigger(name)
   # Send a trigger to xbmc server if user has any configured radio preferences.
