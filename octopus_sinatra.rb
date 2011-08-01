@@ -84,7 +84,7 @@ def lcd_default   # Default lcd display
       $dsp420.write lcd_time_fmt(time, ":"), 14, 20, false
       sleep 60
       # If its the start of a new day, refresh the message.
-      if time.hour == 0 and time.min == 0 and time.sec < 3
+      if time.hour == 0 and time.min == 0
         $dsp420.write motd, 21, 40, false
       end
     end
