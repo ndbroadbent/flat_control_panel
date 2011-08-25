@@ -26,6 +26,7 @@ AlarmChannel = $config["AlarmChannel"]
 HallLightChannel = $config["HallLightChannel"]
 FanChannel = $config["FanChannel"]
 UmbrellaChannel = $config["UmbrellaChannel"]
+WaterPlantsChannel = $config["WaterPlantsChannel"]
 
 $hall_light_on, $fan_on, $umbrella_on = false, false, false
 $hall_light_thread = nil
@@ -292,6 +293,11 @@ post '/action' do
         $umbrella_on = false
         @message = "Umbrella bucket is off."
       end
+    when "Water plants (for 3 seconds)"
+      $k8055.set_digital WaterPlantsChannel, false
+      sleep 3
+      $k8055.set_digital WaterPlantsChannel, false
+      @message = "Plants watered."
     when "Edit Authorizations"
       # Edit authorized users list
       @filename = File.join(File.dirname(__FILE__), "config/authorized_users.yml")

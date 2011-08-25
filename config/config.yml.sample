@@ -5,6 +5,7 @@ AlarmChannel: 3
 HallLightChannel: 4
 FanChannel: 5
 UmbrellaChannel: 7
+WaterPlantsChannel: 6
 
 SwitchDelay: 0.5
 MsgDelay: 2.5
